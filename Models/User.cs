@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations; // Projeta o banco de dados da prova correta e ainda aplica as validacoes
 
 namespace Shop.Models;
 
@@ -14,5 +14,5 @@ public class User
     [MaxLength(20,ErrorMessage = "deve conter no maximo 3 a 60 caracteres")]
     [MinLength(3,ErrorMessage = "deve conter no maximo 3 a 60 caracteres")]
     public string Password { get; set; }
-    public string Role { get; set; }
+    public string Role { get; set; }//o funcionario ( vamos ter o manager e o employ e vamos usar o role para armazenar)
 }
