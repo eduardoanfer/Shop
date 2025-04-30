@@ -49,7 +49,8 @@ namespace Shop.Controllers
 
             try
             {
-                _context.Entry<Category>(model).State = EntityState.Modified;
+                //estou avizando que uma coisa mudou
+                _context.Entry<Category>(model).State = EntityState.Added; 
                 await _context.SaveChangesAsync();
                 return model;
             }
@@ -79,15 +80,23 @@ namespace Shop.Controllers
 
         [HttpDelete]
         [Route("{id:int}")]
-        public async Task<ActionResult<Category>> Delete(int id)
+        public async Task<ActionResult<Category>> Delete(int id
+            , [FromServices] DataContext context)
         {
-            var category = await _context.Categories.FindAsync(id);
+            //x é uma categória
+            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
             if (category == null)
                 return NotFound(new { message = "Categoria não encontrada" });
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-            return Ok(category);
+            try
+            {
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+                return Ok(new {mensagem = "Categoria removido com sucesso" });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new{mensagem ="Não foi possível eliminar a Categoria: " + e.Message});
+            }
         }
     }
 }
