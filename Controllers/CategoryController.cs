@@ -22,22 +22,20 @@ namespace Shop.Controllers
         [Route("")]
         public async Task<ActionResult<List<Category>>> Get()
         {
-            // Buscar do banco de dados
-            var categories = await _context.Categories.ToListAsync();
-            return Ok(categories);
-        }
-
-        [HttpGet]
-        [Route("{id:int}")]
-        public async Task<ActionResult<Category>> Get(int id)
+          var categories = await _context.Categories.AsNoTracking().ToListAsync();
+          return Ok(categories);
+        }   
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Category>> GetbyId(int id,
+        [FromServices]DataContext context)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-                return NotFound(new { message = "Categoria não encontrada" });
-
-            return Ok(category);
+            var categories = await _context.Categories.AsNoTracking()
+                .FirstOrDefaultAsync( x => x.Id == id);
+          if (categories == null)
+              return NotFound(new { message = "Categoria não encontrada" });
+          return Ok(categories);
         }
-
+        
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<Category>> Post(
