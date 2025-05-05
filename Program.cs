@@ -8,7 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(); // Adiciona suporte para controllers
-builder.Services.AddDbContext<DataContext>(opt => opt.UseInMemoryDatabase("Database")); //qual banco
+//builder.Services.AddDbContext<DataContext>(opt => opt.UseInMemoryDatabase("Database")); //qual banco
+builder.Services.AddDbContext<DataContext>(
+    opt=> 
+        opt.UseSqlServer(builder
+            .Configuration
+            .GetConnectionString("connectionstring")));
+
 builder.Services.AddScoped<DataContext, DataContext>();
 var app = builder.Build();
 

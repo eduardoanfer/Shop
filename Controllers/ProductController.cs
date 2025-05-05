@@ -3,10 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Shop.Data;
 using Shop.Models;
+using Shop.ViewModels;
 
 namespace Shop.Controllers;
+
 [Route("Products")]
 public class ProductController : ControllerBase
 {
@@ -24,13 +27,59 @@ public class ProductController : ControllerBase
         {
             return NotFound();
         }
+
         return products;
     }
 
-    [Route("{id}")]
-    public async Task<ActionResult<Product>> GetProducst(int id)
+    [HttpGet]
+    [Route("{id:int}")]
+    public async Task<ActionResult<Product>>
+        Get([FromServices]
+            DataContext context,
+            int id)
     {
-        
+        var product = await context
+            .Products
+            .Include(x => x.Category)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+        return product;
+    } 
+    [HttpGet]
+    [Route("categories/{id:int}")] //products/categories/1 por exempo
+    public async Task<ActionResult<List<Product>>> GetByCategory([FromServices] DataContext context, int id)
+    {
+        var products = await context
+            .Products
+            .Include(x => x.Category)
+            .AsNoTracking()
+            .Where(x => x.CategoryId == id)
+            .ToListAsync();
+        return products;
+        // processar todos os produtos onde o categoryID for igual ao id  e o tolist so usamos no final para listar.
     }
-    
-}
+
+    [HttpPost]
+    [Route("")]
+    public async Task<ActionResult<Product>> Post(
+        [FromServices] DataContext context,
+        [FromBody] ProductViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var product = new Product
+        {
+            Title = model.Title,
+            Description = model.Description,
+            Price = model.Price,
+            CategoryId = model.CategoryId
+        };
+
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+        return Ok(product);
+    }
+
+
+}    
