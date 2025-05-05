@@ -4,10 +4,11 @@ using Shop.Data;
 using Shop.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Shop.Controllers
 {
-    [Route("categories")]
+    [Route("v1/categories")]
     public class CategoryController : ControllerBase
     {
         private readonly DataContext _context;
@@ -20,12 +21,16 @@ namespace Shop.Controllers
 
         [HttpGet]
         [Route("")]
+        [AllowAnonymous]
+        [ResponseCache(VaryByHeader = "User-Agent", Location = ResponseCacheLocation.Any, Duration = 30)] 
+        //duração de 30 minutos. 
         public async Task<ActionResult<List<Category>>> Get()
         {
           var categories = await _context.Categories.AsNoTracking().ToListAsync();
           return Ok(categories);
         }   
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Category>> GetbyId(int id,
         [FromServices]DataContext context)
         {
@@ -38,6 +43,7 @@ namespace Shop.Controllers
         
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<Category>> Post(
             [FromBody] Category model, 
             [FromServices] DataContext context)
@@ -61,6 +67,7 @@ namespace Shop.Controllers
 
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "employee")]
         public async Task<ActionResult<Category>> Put(int id,
             [FromBody] Category model, 
             [FromServices] DataContext context)

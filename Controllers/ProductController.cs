@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -10,11 +11,12 @@ using Shop.ViewModels;
 
 namespace Shop.Controllers;
 
-[Route("Products")]
+[Route("v1/Products")]
 public class ProductController : ControllerBase
 {
     [HttpGet]
     [Route("")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<Product>>> Get([FromServices] DataContext context)
     {
         var products = await context
@@ -33,6 +35,7 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     [Route("{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<Product>>
         Get([FromServices]
             DataContext context,
@@ -47,6 +50,7 @@ public class ProductController : ControllerBase
     } 
     [HttpGet]
     [Route("categories/{id:int}")] //products/categories/1 por exempo
+    [AllowAnonymous]
     public async Task<ActionResult<List<Product>>> GetByCategory([FromServices] DataContext context, int id)
     {
         var products = await context
@@ -61,6 +65,7 @@ public class ProductController : ControllerBase
 
     [HttpPost]
     [Route("")]
+    [Authorize(Roles = "employee")] // um funcionario pode criar produtos 
     public async Task<ActionResult<Product>> Post(
         [FromServices] DataContext context,
         [FromBody] ProductViewModel model)
